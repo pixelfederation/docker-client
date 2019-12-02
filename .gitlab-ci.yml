@@ -1,0 +1,69 @@
+variables:
+  IMAGE_TAG: $CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+  DOCKER_RUNNER_VERSION: 19.03.5
+  DOCKER_VERSION: 19.03.5
+  DOCKER_BUILDX_VERSION: 0.3.1
+  DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION: 0.3.1
+
+stages:
+  - lint
+  - build
+  - test
+  - deploy
+
+lint-shellcheck:
+  image: koalaman/shellcheck-alpine:stable
+  stage: lint
+  script: shellcheck scripts/*.sh
+
+build-docker-image:
+  image: docker:$DOCKER_RUNNER_VERSION
+  stage: build
+  variables:
+    DOCKER_BUILDKIT: "1"
+    DOCKER_TLS_CERTDIR: /certs
+  services:
+    - docker:$DOCKER_RUNNER_VERSION-dind
+  before_script:
+    - docker info
+    - ./scripts/gitlab-docker-registry-login.sh
+  script:
+    - >-
+        docker build --pull --build-arg "DOCKER_VERSION=$DOCKER_VERSION"
+        --build-arg "DOCKER_BUILDX_VERSION=$DOCKER_BUILDX_VERSION"
+        --build-arg "DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION=$DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION"
+        --tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
+    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+
+test-build-self:
+  image: $CI_REGISTRY_IMAGE:$IMAGE_TAG
+  stage: test
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  services:
+    - docker:$DOCKER_RUNNER_VERSION-dind
+  before_script:
+    - docker-use-buildx
+    - gitlab-docker-registry-login
+  script:
+    - docker buildx create --use
+    - docker build . -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG-self" --load
+    - docker image ls
+
+deploy-docker-image:
+  image: docker:$DOCKER_RUNNER_VERSION
+  stage: deploy
+  variables:
+    DOCKER_TLS_CERTDIR: /certs
+  only:
+    - master
+  services:
+    - docker:$DOCKER_RUNNER_VERSION-dind
+  before_script:
+    - ./scripts/gitlab-docker-registry-login.sh
+  script:
+    - docker pull "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+    - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" "$CI_REGISTRY_IMAGE:$DOCKER_VERSION"
+    - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" "$CI_REGISTRY_IMAGE:latest"
+    - docker push "$CI_REGISTRY_IMAGE:$DOCKER_VERSION"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
