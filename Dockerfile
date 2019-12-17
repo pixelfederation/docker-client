@@ -2,6 +2,7 @@ ARG DOCKER_VERSION="19.03.5"
 FROM docker:${DOCKER_VERSION}
 
 RUN apk add --update jq && \
+    apk add --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing pass && \
     apk upgrade && \
     rm -rf /var/cache/apk/*
 
@@ -16,6 +17,16 @@ RUN wget "https://amazon-ecr-credential-helper-releases.s3.us-east-2.amazonaws.c
     mv docker-credential-ecr-login /usr/bin/docker-credential-ecr-login && \
     chmod a+x /usr/bin/docker-credential-ecr-login
 
+ARG DOCKER_PASS_CREDENTIAL_HELPER_VERSION="0.6.3"
+RUN wget "https://github.com/docker/docker-credential-helpers/releases/download/v${DOCKER_PASS_CREDENTIAL_HELPER_VERSION}/docker-credential-pass-v${DOCKER_PASS_CREDENTIAL_HELPER_VERSION}-amd64.tar.gz" && \
+    tar -xvf "docker-credential-pass-v${DOCKER_PASS_CREDENTIAL_HELPER_VERSION}-amd64.tar.gz" && \
+    mv docker-credential-pass /usr/bin/docker-credential-pass && \
+    chmod a+x /usr/bin/docker-credential-pass && \
+    rm "docker-credential-pass-v${DOCKER_PASS_CREDENTIAL_HELPER_VERSION}-amd64.tar.gz"
+
 COPY scripts/gitlab-docker-registry-login.sh /usr/bin/gitlab-docker-registry-login
 COPY scripts/aws-ecr-login.sh /usr/bin/aws-ecr-login
 COPY scripts/docker-use-buildx.sh /usr/bin/docker-use-buildx
+COPY scripts/docker-use-pass.sh /usr/bin/docker-use-pass
+
+RUN sh /usr/bin/docker-use-pass
