@@ -1,0 +1,60 @@
+version: "3.7"
+
+x-aliases:
+  - &DEFAULT_ARGS
+    DOCKER_VERSION: ${DOCKER_VERSION:-19.03.5}
+    DOCKER_BUILDX_VERSION: ${DOCKER_BUILDX_VERSION:-0.3.1}
+    DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION: ${DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION:-0.3.1}
+    DOCKER_PASS_CREDENTIAL_HELPER_VERSION: ${DOCKER_PASS_CREDENTIAL_HELPER_VERSION:-0.6.3}
+
+volumes:
+  dind-ca: {}
+  dind-server: {}
+  dind-client: {}
+
+networks:
+  dind: {}
+
+services:
+  local:
+    image: ${REGISTRY:-registry.gitlab.com}/${NAMESPACE:-swoole-bundle}/${PROJECT_NAME:-docker-client}-local:${IMAGE_TAG:-local}
+    build:
+      context: .
+      args:
+        <<: *DEFAULT_ARGS
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./examples:/workspace:ro
+
+  dind:
+    image: docker.io/docker:${DOCKER_VERSION:-19.03.5}-dind
+    restart: always
+    privileged: true
+    environment:
+      DOCKER_TLS_SAN: DNS:dind # same as docker-compose service
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - dind-ca:/certs/ca:rw
+      - dind-server:/certs/server:rw
+      - dind-client:/certs/client:rw
+    networks:
+      - dind
+
+  remote:
+    image: ${REGISTRY:-registry.gitlab.com}/${NAMESPACE:-swoole-bundle}/${PROJECT_NAME:-docker-client}-remote:${IMAGE_TAG:-local}
+    depends_on:
+      - dind
+    build:
+      context: .
+      args:
+        <<: *DEFAULT_ARGS
+    environment:
+      DOCKER_HOST: tcp://dind:2376
+      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_BUILDX_CONTEXT_CREATE: 1
+      DOCKER_BUILDX_BUILDER_CREATE: 1
+    volumes:
+      - dind-client:/certs/client:ro
+      - ./examples:/workspace:ro
+    networks:
+      - dind

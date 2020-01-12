@@ -39,14 +39,15 @@ test-build-self:
   image: $CI_REGISTRY_IMAGE:$IMAGE_TAG
   stage: test
   variables:
-    DOCKER_TLS_CERTDIR: ""
+    DOCKER_TLS_CERTDIR: /certs
+    DOCKER_BUILDX_CONTEXT_CREATE: "1"
+    DOCKER_BUILDX_BUILDER_CREATE: "1"
   services:
     - docker:$DOCKER_RUNNER_VERSION-dind
   before_script:
     - docker-use-buildx
     - gitlab-docker-registry-login
   script:
-    - docker buildx create --use
     - docker build . -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG-self" --load
     - docker image ls
 

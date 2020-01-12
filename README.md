@@ -4,6 +4,14 @@ This image is used to build other docker images on GitLab. It has additional too
 
 ## Building
 
+### Docker-compose
+
+```sh
+docker-compose build --pull
+```
+
+### Docker only
+
 ```sh
 DOCKER_VERSION="19.03.5"
 DOCKER_BUILDX_VERSION="0.3.1"
@@ -18,7 +26,7 @@ docker run --rm -ti -v "/var/run/docker.sock:/var/run/docker.sock" "registry.git
 
 docker push registry.gitlab.com/swoole-bundle/docker-client
 
-## Examples
+## GitLab Examples
 
 ### Running build commands using `docker/buildx`
 
@@ -27,12 +35,13 @@ build-docker-image:
   stage: build
   image: registry.gitlab.com/swoole-bundle/docker-client:latest
   variables:
-    DOCKER_TLS_CERTDIR: "" # won't work with TLS enabled on gitlab shared runners
+    DOCKER_TLS_CERTDIR: /certs
+    DOCKER_BUILDX_CONTEXT_CREATE: "1"
+    DOCKER_BUILDX_BUILDER_CREATE: "1"
   services:
     - docker:19.03.5-dind
   before_script:
     - docker-use-buildx
-    - docker buildx create --use
   script:
     - >-
         docker build
@@ -78,4 +87,72 @@ build-docker-image:
   script:
     - docker build --tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
     - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
+```
+
+## Local Examples using Docker-compose
+
+### Exposed local daemon via unix socket
+
+```sh
+# Build
+docker-compose build --pull
+
+# Use
+docker-compose run --rm local docker ps
+
+# or
+docker-compose run --rm local sh
+
+cd workspace/nginx
+./build-and-run.sh
+# ...
+# <b>Hello Docker!</b>
+```
+
+### Docker in Docker (dind)
+
+```sh
+# Start docker daemon in docker (dind)
+docker-compose up -d dind
+
+# Build
+docker-compose build --pull
+
+# Start
+docker-compose run --rm remote docker ps
+
+# or
+docker-compose run --rm remote sh
+
+cd workspace/nginx
+./build-and-run.sh
+# ...
+# <b>Hello Docker!</b>
+
+```
+
+### Docker in Docker (dind) with buildx
+
+```sh
+# Start docker daemon in docker (dind)
+docker-compose up -d dind
+
+# Build
+docker-compose build --pull
+
+# Start
+docker-compose run --rm remote sh
+
+docker-use-buildx
+cd workspace/nginx
+./buildx-and-run.sh
+# ...
+# <b>Hello Docker!</b>
+
+```
+
+### Clean-up
+
+```sh
+docker-compose down -v
 ```
