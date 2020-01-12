@@ -1,7 +1,9 @@
 ARG DOCKER_VERSION="19.03.5"
 FROM docker:${DOCKER_VERSION}
 
-RUN apk add --no-cache jq
+RUN apk add --update jq && \
+    apk upgrade && \
+    rm -rf /var/cache/apk/*
 
 ARG DOCKER_BUILDX_VERSION="0.3.1"
 RUN wget "https://github.com/docker/buildx/releases/download/v${DOCKER_BUILDX_VERSION}/buildx-v${DOCKER_BUILDX_VERSION}.linux-amd64" && \

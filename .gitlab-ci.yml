@@ -2,6 +2,8 @@ variables:
   IMAGE_TAG: $CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
   DOCKER_RUNNER_VERSION: 19.03.5
   DOCKER_VERSION: 19.03.5
+  DOCKER_TLS_CERTDIR: /certs
+  TRIVY_VERSION: 0.4.1
   DOCKER_BUILDX_VERSION: 0.3.1
   DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION: 0.3.1
 
@@ -21,7 +23,6 @@ build-docker-image:
   stage: build
   variables:
     DOCKER_BUILDKIT: "1"
-    DOCKER_TLS_CERTDIR: /certs
   services:
     - docker:$DOCKER_RUNNER_VERSION-dind
   before_script:
@@ -39,7 +40,6 @@ test-build-self:
   image: $CI_REGISTRY_IMAGE:$IMAGE_TAG
   stage: test
   variables:
-    DOCKER_TLS_CERTDIR: /certs
     DOCKER_BUILDX_CONTEXT_CREATE: "1"
     DOCKER_BUILDX_BUILDER_CREATE: "1"
   services:
@@ -51,11 +51,26 @@ test-build-self:
     - docker build . -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG-self" --load
     - docker image ls
 
+test-scan-trivy:
+  image:
+    name: aquasec/trivy:$TRIVY_VERSION
+    entrypoint: [""]
+  stage: test
+  cache:
+    paths:
+      - $CI_PROJECT_DIR/.trivycache/
+  variables:
+    TRIVY_AUTH_URL: $CI_REGISTRY
+    TRIVY_USERNAME: $CI_REGISTRY_USER
+    TRIVY_PASSWORD: $CI_REGISTRY_PASSWORD
+    TRIVY_CACHE_DIR: $CI_PROJECT_DIR/.trivycache/
+  allow_failure: true
+  script:
+    - trivy -no-progress "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+
 deploy-docker-image:
   image: docker:$DOCKER_RUNNER_VERSION
   stage: deploy
-  variables:
-    DOCKER_TLS_CERTDIR: /certs
   only:
     - master
   services:
