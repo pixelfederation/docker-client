@@ -1,11 +1,15 @@
 variables:
   IMAGE_TAG: $CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
-  DOCKER_RUNNER_VERSION: 19.03.5
-  DOCKER_VERSION: 19.03.5
+  IMAGE_TAG_COMPOSE: $CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-compose
+  DOCKER_HUB_REPOSITORY: k911/docker-client
   DOCKER_TLS_CERTDIR: /certs
-  TRIVY_VERSION: 0.4.2
+  DOCKER_RUNNER_VERSION: 19.03.6
+  DOCKER_VERSION: 19.03.6
+  TRIVY_VERSION: 0.4.3
   DOCKER_BUILDX_VERSION: 0.3.1
   DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION: 0.4.0
+  DOCKER_PASS_CREDENTIAL_HELPER_VERSION: 0.6.3
+  DOCKER_COMPOSE_VERSION: 1.25.4
 
 stages:
   - lint
@@ -29,14 +33,27 @@ build-docker-image:
     - docker info
     - ./scripts/gitlab-docker-registry-login.sh
   script:
+    - docker pull "$CI_REGISTRY_IMAGE:latest" || true
     - >-
         docker build --pull --build-arg "DOCKER_VERSION=$DOCKER_VERSION"
+        --target client
         --build-arg "DOCKER_BUILDX_VERSION=$DOCKER_BUILDX_VERSION"
         --build-arg "DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION=$DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION"
+        --build-arg "DOCKER_PASS_CREDENTIAL_HELPER_VERSION=$DOCKER_PASS_CREDENTIAL_HELPER_VERSION"
         --tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
     - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+    - docker pull "$CI_REGISTRY_IMAGE:composer" || true
+    - >-
+        docker build --pull --build-arg "DOCKER_VERSION=$DOCKER_VERSION"
+        --target compose
+        --build-arg "DOCKER_BUILDX_VERSION=$DOCKER_BUILDX_VERSION"
+        --build-arg "DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION=$DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION"
+        --build-arg "DOCKER_PASS_CREDENTIAL_HELPER_VERSION=$DOCKER_PASS_CREDENTIAL_HELPER_VERSION"
+        --build-arg "DOCKER_COMPOSE_VERSION=$DOCKER_COMPOSE_VERSION"
+        --tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE" .
+    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE"
 
-test-build-self:
+test-build-self-buildx:
   image: $CI_REGISTRY_IMAGE:$IMAGE_TAG
   stage: test
   variables:
@@ -50,6 +67,21 @@ test-build-self:
   script:
     - docker build . -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG-self" --load
     - docker image ls
+
+test-build-self-docker-compose:
+  image: $CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE
+  stage: test
+  variables:
+    TARGET: compose
+    DOCKER_BUILDKIT: "1"
+    COMPOSE_DOCKER_CLI_BUILD: "1"
+  services:
+    - docker:$DOCKER_RUNNER_VERSION-dind
+  before_script:
+    - gitlab-docker-registry-login
+  script:
+    - docker-compose build --pull local
+    - docker images ls
 
 test-scan-trivy:
   image:
@@ -67,19 +99,44 @@ test-scan-trivy:
   allow_failure: true
   script:
     - trivy -no-progress "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+    - trivy -no-progress "$CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE"
 
 deploy-docker-image:
   image: docker:$DOCKER_RUNNER_VERSION
   stage: deploy
+  variables:
+    DOCKER_REGISTRY: $DOCKER_HUB_REGISTRY
+    DOCKER_USERNAME: $DOCKER_HUB_USERNAME
+    DOCKER_PASSWORD: $DOCKER_HUB_TOKEN
+  environment:
+    name: prod
   only:
     - master
   services:
     - docker:$DOCKER_RUNNER_VERSION-dind
   before_script:
+    - ./scripts/docker-registry-login.sh
     - ./scripts/gitlab-docker-registry-login.sh
   script:
     - docker pull "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+    - docker pull "$CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE"
+    # GitLab tags
     - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" "$CI_REGISTRY_IMAGE:$DOCKER_VERSION"
     - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" "$CI_REGISTRY_IMAGE:latest"
+    - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE" "$CI_REGISTRY_IMAGE:$DOCKER_VERSION-compose"
+    - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE" "$CI_REGISTRY_IMAGE:compose"
+    # Docker Hub tags
+    - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_REPOSITORY:$DOCKER_VERSION"
+    - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_REPOSITORY:latest"
+    - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE" "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_REPOSITORY:$DOCKER_VERSION-compose"
+    - docker tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE" "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_REPOSITORY:compose"
+    # GitLab push
     - docker push "$CI_REGISTRY_IMAGE:$DOCKER_VERSION"
     - docker push "$CI_REGISTRY_IMAGE:latest"
+    - docker push "$CI_REGISTRY_IMAGE:$DOCKER_VERSION-compose"
+    - docker push "$CI_REGISTRY_IMAGE:compose"
+    # DockerHub pash
+    - docker push "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_REPOSITORY:$DOCKER_VERSION"
+    - docker push "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_REPOSITORY:latest"
+    - docker push "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_REPOSITORY:$DOCKER_VERSION-compose"
+    - docker push "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_REPOSITORY:compose"
