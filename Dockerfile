@@ -1,4 +1,4 @@
-ARG DOCKER_VERSION="19.03.6"
+ARG DOCKER_VERSION="19.03.7"
 FROM docker:${DOCKER_VERSION} as client
 
 RUN apk add --update jq && \
