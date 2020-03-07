@@ -61,3 +61,8 @@ services:
       - ./examples:/workspace:ro
     networks:
       - dind
+
+  example-nginx:
+    image: ${REGISTRY:-registry.gitlab.com}/${NAMESPACE:-swoole-bundle}/${PROJECT_NAME:-docker-client}-example-nginx:${IMAGE_TAG:-local}
+    build:
+      context: examples/nginx

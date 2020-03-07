@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export IMAGE_NOW="local-build:$(date +%s)"
+IMAGE_NOW="local-build:$(date +%s)"
 docker build . -t "$IMAGE_NOW"
 docker stop nginx || true
 docker rm nginx || true

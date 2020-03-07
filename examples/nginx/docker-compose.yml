@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  app:
+    image: "${TEST_REGISTRY:-test.registry.io}/${TEST_NAMESPACE:-example}/${TEST_PROJECT:-example-nginx}:${TEST_IMAGE_TAG:-local}"
+    build:
+      context: .
+      target: target1
+    ports:
+       - 80:80
+
+  app2:
+    image: "${TEST_REGISTRY:-test.registry.io}/${TEST_NAMESPACE:-example}/${TEST_PROJECT:-example-nginx2}:${TEST_IMAGE_TAG:-local}"
+    build:
+      context: .
+      target: target2
+    ports:
+       - 80:80

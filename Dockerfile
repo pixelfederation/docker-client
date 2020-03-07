@@ -1,7 +1,7 @@
 ARG DOCKER_VERSION="19.03.7"
 FROM docker:${DOCKER_VERSION} as client
 
-RUN apk add --update jq && \
+RUN apk add --update jq bash curl git openssh-client && \
     apk add --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing pass && \
     apk upgrade && \
     rm -rf /var/cache/apk/*
