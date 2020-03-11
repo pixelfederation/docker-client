@@ -1,4 +1,4 @@
-ARG DOCKER_VERSION="19.03.7"
+ARG DOCKER_VERSION="19.03.8"
 FROM docker:${DOCKER_VERSION} as client
 
 RUN apk add --update jq bash curl git openssh-client && \
