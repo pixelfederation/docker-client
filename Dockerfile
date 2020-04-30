@@ -2,11 +2,11 @@ ARG DOCKER_VERSION="19.03.8"
 FROM docker:${DOCKER_VERSION} as client
 
 RUN apk add --update jq bash curl git openssh-client && \
-    apk add --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing pass && \
+    apk add --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community pass && \
     apk upgrade && \
     rm -rf /var/cache/apk/*
 
-ARG DOCKER_BUILDX_VERSION="0.3.1"
+ARG DOCKER_BUILDX_VERSION="0.4.0"
 ARG DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.4.0"
 ARG DOCKER_PASS_CREDENTIAL_HELPER_VERSION="0.6.3"
 
@@ -37,7 +37,7 @@ RUN sh /usr/bin/docker-use-pass
 
 FROM client as compose
 
-ARG DOCKER_COMPOSE_VERSION="1.25.4"
+ARG DOCKER_COMPOSE_VERSION="1.25.5"
 
 # install docker-compose
 RUN apk add python3 openssl && \
