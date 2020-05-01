@@ -6,7 +6,7 @@ RUN apk add --update jq bash curl git openssh-client && \
     apk upgrade && \
     rm -rf /var/cache/apk/*
 
-ARG DOCKER_BUILDX_VERSION="0.4.0"
+ARG DOCKER_BUILDX_VERSION="0.4.1"
 ARG DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.4.0"
 ARG DOCKER_PASS_CREDENTIAL_HELPER_VERSION="0.6.3"
 
