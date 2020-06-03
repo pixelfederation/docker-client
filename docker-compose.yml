@@ -2,11 +2,11 @@ version: "3.7"
 
 x-aliases:
   - &DEFAULT_ARGS
-    DOCKER_VERSION: ${DOCKER_VERSION:-19.03.8}
+    DOCKER_VERSION: ${DOCKER_VERSION:-19.03.11}
     DOCKER_BUILDX_VERSION: ${DOCKER_BUILDX_VERSION:-0.4.1}
     DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION: ${DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION:-0.4.0}
     DOCKER_PASS_CREDENTIAL_HELPER_VERSION: ${DOCKER_PASS_CREDENTIAL_HELPER_VERSION:-0.6.3}
-    DOCKER_COMPOSE_VERSION: ${DOCKER_COMPOSE_VERSION:-1.25.5}
+    DOCKER_COMPOSE_VERSION: ${DOCKER_COMPOSE_VERSION:-1.26.0}
 
 volumes:
   dind-ca: {}
@@ -29,7 +29,7 @@ services:
       - ./examples:/workspace:ro
 
   dind:
-    image: docker.io/docker:${DOCKER_VERSION:-19.03.8}-dind
+    image: docker.io/docker:${DOCKER_VERSION:-19.03.11}-dind
     restart: always
     privileged: true
     environment:
