@@ -1,4 +1,4 @@
-ARG DOCKER_VERSION="19.03.11"
+ARG DOCKER_VERSION="19.03.12"
 FROM docker:${DOCKER_VERSION} as client
 
 RUN apk add --update jq bash curl git openssh-client && \
@@ -37,7 +37,7 @@ RUN sh /usr/bin/docker-use-pass
 
 FROM client as compose
 
-ARG DOCKER_COMPOSE_VERSION="1.26.0"
+ARG DOCKER_COMPOSE_VERSION="1.26.2"
 
 # install docker-compose
 RUN apk add py3-pip python3 openssl && \
