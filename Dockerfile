@@ -37,10 +37,5 @@ RUN sh /usr/bin/docker-use-pass
 
 FROM client as compose
 
-ARG DOCKER_COMPOSE_VERSION="1.26.2"
-
 # install docker-compose
-RUN apk add py3-pip python3 openssl && \
-    apk add -t .build-deps g++ libffi-dev python3-dev openssl-dev make && \
-    pip3 install docker-compose=="$DOCKER_COMPOSE_VERSION" && \
-    apk del .build-deps
+RUN apk add --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community docker-compose
