@@ -1,3 +1,4 @@
+# https://github.com/docker/docker-ce/releases
 ARG DOCKER_VERSION="19.03.12"
 FROM docker:${DOCKER_VERSION} as client
 
@@ -6,8 +7,11 @@ RUN apk add --update jq bash curl git openssh-client && \
     apk upgrade && \
     rm -rf /var/cache/apk/*
 
-ARG DOCKER_BUILDX_VERSION="0.4.1"
+# https://github.com/docker/buildx/releases
+ARG DOCKER_BUILDX_VERSION="0.4.2"
+# https://github.com/awslabs/amazon-ecr-credential-helper/releases
 ARG DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.4.0"
+# https://github.com/docker/docker-credential-helpers/releases
 ARG DOCKER_PASS_CREDENTIAL_HELPER_VERSION="0.6.3"
 
 # install docker buildx
@@ -38,4 +42,5 @@ RUN sh /usr/bin/docker-use-pass
 FROM client as compose
 
 # install docker-compose
+# https://github.com/docker/compose/releases
 RUN apk add --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community docker-compose
