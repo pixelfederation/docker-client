@@ -1,5 +1,5 @@
 # https://github.com/docker/docker-ce/releases
-ARG DOCKER_VERSION="19.03.12"
+ARG DOCKER_VERSION="19.03.13"
 FROM docker:${DOCKER_VERSION} as client
 
 RUN apk add --update jq bash curl git openssh-client && \
