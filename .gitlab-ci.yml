@@ -141,8 +141,6 @@ deploy-docker-image:
     DOCKER_PASSWORD: $DOCKER_HUB_TOKEN
   environment:
     name: prod
-  needs:
-    - build-docker-image
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
   services:
