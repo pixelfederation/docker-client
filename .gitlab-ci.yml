@@ -32,7 +32,7 @@ lint-shellcheck:
         - scripts/*.sh
         - .gitlab-ci.yml
 
-lint-yamlint:
+lint-yamllint:
   image: python:$PYTHON_VERSION-alpine$ALPINE_VERSION
   stage: lint
   variables:
