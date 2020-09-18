@@ -5,10 +5,17 @@ variables:
   DOCKER_TLS_CERTDIR: /certs
   DOCKER_RUNNER_VERSION: 19.03.13
   DOCKER_VERSION: 19.03.13
-  TRIVY_VERSION: 0.11.0 # https://github.com/aquasecurity/trivy/releases
+  TRIVY_VERSION: 0.11.0
   DOCKER_BUILDX_VERSION: 0.4.2
   DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION: 0.4.0
   DOCKER_PASS_CREDENTIAL_HELPER_VERSION: 0.6.3
+  PYTHON_VERSION: "3.8"
+  ALPINE_VERSION: "3.12"
+
+# do not run duplicate "detached" pipelines
+# https://docs.gitlab.com/ee/ci/yaml/README.html#workflowrules-templates
+include:
+  - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
 
 stages:
   - lint
@@ -20,6 +27,25 @@ lint-shellcheck:
   image: koalaman/shellcheck-alpine:stable
   stage: lint
   script: shellcheck scripts/*.sh
+  rules:
+    - changes:
+        - scripts/*.sh
+        - .gitlab-ci.yml
+
+lint-yamlint:
+  image: python:$PYTHON_VERSION-alpine$ALPINE_VERSION
+  stage: lint
+  variables:
+    PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip/
+  cache:
+    paths:
+      - .cache/pip/
+  before_script:
+    - pip install yamllint
+  script: yamllint .
+  rules:
+    - changes:
+        - "**/*.{yml,yaml}"
 
 build-docker-image:
   image: docker:$DOCKER_RUNNER_VERSION
@@ -55,6 +81,8 @@ build-docker-image:
 test-build-self-buildx:
   image: $CI_REGISTRY_IMAGE:$IMAGE_TAG
   stage: test
+  needs:
+    - build-docker-image
   variables:
     DOCKER_BUILDX_CONTEXT_CREATE: "1"
     DOCKER_BUILDX_BUILDER_CREATE: "1"
@@ -70,6 +98,8 @@ test-build-self-buildx:
 test-build-self-docker-compose:
   image: $CI_REGISTRY_IMAGE:$IMAGE_TAG_COMPOSE
   stage: test
+  needs:
+    - build-docker-image
   variables:
     TARGET: compose
     DOCKER_BUILDKIT: "1"
@@ -87,9 +117,11 @@ test-scan-trivy:
     name: aquasec/trivy:$TRIVY_VERSION
     entrypoint: [""]
   stage: test
+  needs:
+    - build-docker-image
   cache:
     paths:
-      - $CI_PROJECT_DIR/.trivycache/
+      - .trivycache/
   variables:
     TRIVY_AUTH_URL: $CI_REGISTRY
     TRIVY_USERNAME: $CI_REGISTRY_USER
@@ -109,8 +141,10 @@ deploy-docker-image:
     DOCKER_PASSWORD: $DOCKER_HUB_TOKEN
   environment:
     name: prod
-  only:
-    - master
+  needs:
+    - build-docker-image
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
   services:
     - docker:$DOCKER_RUNNER_VERSION-dind
   before_script:

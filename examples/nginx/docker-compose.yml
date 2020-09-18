@@ -7,7 +7,7 @@ services:
       context: .
       target: target1
     ports:
-       - 80:80
+      - 80:80
 
   app2:
     image: "${TEST_REGISTRY:-test.registry.io}/${TEST_NAMESPACE:-example}/${TEST_PROJECT:-example-nginx2}:${TEST_IMAGE_TAG:-local}"
@@ -15,4 +15,4 @@ services:
       context: .
       target: target2
     ports:
-       - 80:80
+      - 80:80

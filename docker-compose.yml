@@ -32,7 +32,8 @@ services:
     restart: always
     privileged: true
     environment:
-      DOCKER_TLS_SAN: DNS:dind # same as docker-compose service
+      # same as docker-compose service
+      DOCKER_TLS_SAN: DNS:dind
       DOCKER_TLS_CERTDIR: /certs
     volumes:
       - dind-ca:/certs/ca:rw
