@@ -13,9 +13,9 @@ docker-compose build --pull
 ### Docker only
 
 ```sh
-DOCKER_VERSION="19.03.5"
-DOCKER_BUILDX_VERSION="0.3.1"
-DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.3.1"
+DOCKER_VERSION="20.10.5"
+DOCKER_BUILDX_VERSION="0.5.1"
+DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.5.0"
 docker build --pull --build-arg "DOCKER_VERSION=$DOCKER_VERSION" \
     --build-arg "DOCKER_BUILDX_VERSION=$DOCKER_BUILDX_VERSION" \
     --build-arg "DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION=$DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION" \
@@ -64,7 +64,7 @@ build-docker-image:
     AWS_ACCESS_KEY_ID: xxxxx
     AWS_SECRET_ACCESS_KEY: xxxxx
   services:
-    - docker:19.03.5-dind
+    - docker:20.10.5-dind
   before_script:
     - aws-ecr-login
   script:
@@ -81,7 +81,7 @@ build-docker-image:
   variables:
     DOCKER_TLS_CERTDIR: /certs
   services:
-    - docker:19.03.5-dind
+    - docker:20.10.5-dind
   before_script:
     - gitlab-docker-registry-login
   script:

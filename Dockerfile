@@ -1,5 +1,5 @@
 # https://github.com/docker/docker-ce/releases
-ARG DOCKER_VERSION="20.10.1"
+ARG DOCKER_VERSION="20.10.5"
 FROM docker:${DOCKER_VERSION} as client
 
 RUN apk add --update jq bash curl git openssh-client && \
@@ -10,7 +10,7 @@ RUN apk add --update jq bash curl git openssh-client && \
 # https://github.com/docker/buildx/releases
 ARG DOCKER_BUILDX_VERSION="0.5.1"
 # https://github.com/awslabs/amazon-ecr-credential-helper/releases
-ARG DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.4.0"
+ARG DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.5.0"
 # https://github.com/docker/docker-credential-helpers/releases
 ARG DOCKER_PASS_CREDENTIAL_HELPER_VERSION="0.6.3"
 
