@@ -2,9 +2,9 @@ version: "3.9"
 
 x-aliases:
   - &DEFAULT_ARGS
-    DOCKER_VERSION: ${DOCKER_VERSION:-20.10.5}
+    DOCKER_VERSION: ${DOCKER_VERSION:-20.10.17}
     DOCKER_COMPOSE_VERSION: ${DOCKER_COMPOSE_VERSION:-1.29.0}
-    DOCKER_BUILDX_VERSION: ${DOCKER_BUILDX_VERSION:-0.5.1}
+    DOCKER_BUILDX_VERSION: ${DOCKER_BUILDX_VERSION:-0.8.2}
     DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION: ${DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION:-0.5.0}
     DOCKER_PASS_CREDENTIAL_HELPER_VERSION: ${DOCKER_PASS_CREDENTIAL_HELPER_VERSION:-0.6.3}
 
@@ -18,7 +18,7 @@ networks:
 
 services:
   local:
-    image: ${REGISTRY:-registry.gitlab.com}/${NAMESPACE:-swoole-bundle}/${PROJECT_NAME:-docker-client}-local:${IMAGE_TAG:-local}
+    image: ${REGISTRY:-docker.io}/${NAMESPACE:-pixelfederation}/${PROJECT_NAME:-docker-client}-local:${IMAGE_TAG:-local}
     build:
       context: .
       target: "${TARGET:-client}"
@@ -29,7 +29,7 @@ services:
       - ./examples:/workspace:ro
 
   dind:
-    image: docker.io/docker:${DOCKER_VERSION:-20.10.5}-dind
+    image: docker.io/docker:${DOCKER_VERSION:-20.10.17}-dind
     restart: always
     privileged: true
     environment:
@@ -44,7 +44,7 @@ services:
       - dind
 
   remote:
-    image: ${REGISTRY:-registry.gitlab.com}/${NAMESPACE:-swoole-bundle}/${PROJECT_NAME:-docker-client}-remote:${IMAGE_TAG:-local}
+    image: ${REGISTRY:-docker.io}/${NAMESPACE:-pixelfederation}/${PROJECT_NAME:-docker-client}-remote:${IMAGE_TAG:-local}
     depends_on:
       - dind
     build:
@@ -66,6 +66,6 @@ services:
       - dind
 
   example-nginx:
-    image: ${REGISTRY:-registry.gitlab.com}/${NAMESPACE:-swoole-bundle}/${PROJECT_NAME:-docker-client}-example-nginx:${IMAGE_TAG:-local}
+    image: ${REGISTRY:-docker.io}/${NAMESPACE:-pixelfederation}/${PROJECT_NAME:-docker-client}-example-nginx:${IMAGE_TAG:-local}
     build:
       context: examples/nginx

@@ -13,18 +13,18 @@ docker-compose build --pull
 ### Docker only
 
 ```sh
-DOCKER_VERSION="20.10.5"
-DOCKER_BUILDX_VERSION="0.5.1"
+DOCKER_VERSION="20.10.17"
+DOCKER_BUILDX_VERSION="0.8.2"
 DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.5.0"
 docker build --pull --build-arg "DOCKER_VERSION=$DOCKER_VERSION" \
     --build-arg "DOCKER_BUILDX_VERSION=$DOCKER_BUILDX_VERSION" \
     --build-arg "DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION=$DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION" \
-    --tag "registry.gitlab.com/swoole-bundle/docker-client:$DOCKER_VERSION" .
+    --tag "docker.io/pixelfederation/docker-client:$DOCKER_VERSION" .
 
-docker run --rm -ti -v "/var/run/docker.sock:/var/run/docker.sock" "registry.gitlab.com/swoole-bundle/docker-client:$DOCKER_VERSION" info
+docker run --rm -ti -v "/var/run/docker.sock:/var/run/docker.sock" "docker.io/pixelfederation/docker-client:$DOCKER_VERSION" info
 ```
 
-docker push registry.gitlab.com/swoole-bundle/docker-client
+docker push docker.io/pixelfederation/docker-client
 
 ## GitLab Examples
 
@@ -33,7 +33,7 @@ docker push registry.gitlab.com/swoole-bundle/docker-client
 ```yaml
 build-docker-image:
   stage: build
-  image: registry.gitlab.com/swoole-bundle/docker-client:latest
+  image: docker.io/pixelfederation/docker-client:latest
   variables:
     DOCKER_TLS_CERTDIR: /certs
     DOCKER_BUILDX_CONTEXT_CREATE: "1"
@@ -56,7 +56,7 @@ build-docker-image:
 ```yaml
 build-docker-image:
   stage: build
-  image: registry.gitlab.com/swoole-bundle/docker-client:latest
+  image: docker.io/pixelfederation/docker-client:latest
   variables:
     DOCKER_TLS_CERTDIR: /certs
     AWS_ACCOUNT_ID: xxxxx
@@ -64,7 +64,7 @@ build-docker-image:
     AWS_ACCESS_KEY_ID: xxxxx
     AWS_SECRET_ACCESS_KEY: xxxxx
   services:
-    - docker:20.10.5-dind
+    - docker:20.10.17-dind
   before_script:
     - aws-ecr-login
   script:
@@ -77,11 +77,11 @@ build-docker-image:
 ```yaml
 build-docker-image:
   stage: build
-  image: registry.gitlab.com/swoole-bundle/docker-client:latest
+  image: docker.io/pixelfederation/docker-client:latest
   variables:
     DOCKER_TLS_CERTDIR: /certs
   services:
-    - docker:20.10.5-dind
+    - docker:20.10.17-dind
   before_script:
     - gitlab-docker-registry-login
   script:
