@@ -1,5 +1,5 @@
 # https://github.com/moby/moby/releases
-ARG DOCKER_VERSION="23.0.3"
+ARG DOCKER_VERSION="20.10.18"
 
 # https://github.com/docker/compose/releases
 ARG DOCKER_COMPOSE_VERSION="1.29.2"

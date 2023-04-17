@@ -2,7 +2,7 @@ version: "3.9"
 
 x-aliases:
   - &DEFAULT_ARGS
-    DOCKER_VERSION: ${DOCKER_VERSION:-23.0.3}
+    DOCKER_VERSION: ${DOCKER_VERSION:-20.10.18}
     DOCKER_COMPOSE_VERSION: ${DOCKER_COMPOSE_VERSION:-1.29.0}
     DOCKER_BUILDX_VERSION: ${DOCKER_BUILDX_VERSION:-0.10.4}
     DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION: ${DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION:-0.6.0}
@@ -29,7 +29,7 @@ services:
       - ./examples:/workspace:ro
 
   dind:
-    image: docker.io/docker:${DOCKER_VERSION:-23.0.3}-dind
+    image: docker.io/docker:${DOCKER_VERSION:-20.10.18}-dind
     restart: always
     privileged: true
     environment:
