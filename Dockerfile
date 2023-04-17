@@ -1,5 +1,5 @@
 # https://github.com/moby/moby/releases
-ARG DOCKER_VERSION="20.10.17"
+ARG DOCKER_VERSION="23.0.3"
 
 # https://github.com/docker/compose/releases
 ARG DOCKER_COMPOSE_VERSION="1.29.2"
@@ -11,11 +11,11 @@ RUN apk add --update jq bash curl git openssh-client pass dirmngr gpg-agent && \
     rm -rf /var/cache/apk/*
 
 # https://github.com/docker/buildx/releases
-ARG DOCKER_BUILDX_VERSION="0.8.2"
+ARG DOCKER_BUILDX_VERSION="0.10.4"
 # https://github.com/awslabs/amazon-ecr-credential-helper/releases
 ARG DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.6.0"
 # https://github.com/docker/docker-credential-helpers/releases
-ARG DOCKER_PASS_CREDENTIAL_HELPER_VERSION="0.6.4"
+ARG DOCKER_PASS_CREDENTIAL_HELPER_VERSION="0.7.0"
 
 # install docker buildx
 RUN wget "https://github.com/docker/buildx/releases/download/v${DOCKER_BUILDX_VERSION}/buildx-v${DOCKER_BUILDX_VERSION}.linux-amd64" && \
