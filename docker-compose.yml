@@ -18,7 +18,7 @@ networks:
 
 services:
   local:
-    image: ${REGISTRY:-docker.io}/${NAMESPACE:-pixelfederation}/${PROJECT_NAME:-docker-client}-local:${IMAGE_TAG:-local}
+    image: ${REGISTRY:-docker.io}/${NAMESPACE:-openswoolebundle}/${PROJECT_NAME:-docker-client}-local:${IMAGE_TAG:-local}
     build:
       context: .
       target: "${TARGET:-client}"
@@ -44,7 +44,7 @@ services:
       - dind
 
   remote:
-    image: ${REGISTRY:-docker.io}/${NAMESPACE:-pixelfederation}/${PROJECT_NAME:-docker-client}-remote:${IMAGE_TAG:-local}
+    image: ${REGISTRY:-docker.io}/${NAMESPACE:-openswoolebundle}/${PROJECT_NAME:-docker-client}-remote:${IMAGE_TAG:-local}
     depends_on:
       - dind
     build:
@@ -66,6 +66,6 @@ services:
       - dind
 
   example-nginx:
-    image: ${REGISTRY:-docker.io}/${NAMESPACE:-pixelfederation}/${PROJECT_NAME:-docker-client}-example-nginx:${IMAGE_TAG:-local}
+    image: ${REGISTRY:-docker.io}/${NAMESPACE:-openswoolebundle}/${PROJECT_NAME:-docker-client}-example-nginx:${IMAGE_TAG:-local}
     build:
       context: examples/nginx

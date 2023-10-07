@@ -19,12 +19,12 @@ DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION="0.5.0"
 docker build --pull --build-arg "DOCKER_VERSION=$DOCKER_VERSION" \
     --build-arg "DOCKER_BUILDX_VERSION=$DOCKER_BUILDX_VERSION" \
     --build-arg "DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION=$DOCKER_AWS_ECR_CREDENTIAL_HELPER_VERSION" \
-    --tag "docker.io/pixelfederation/docker-client:$DOCKER_VERSION" .
+    --tag "docker.io/openswoolebundle/docker-client:$DOCKER_VERSION" .
 
-docker run --rm -ti -v "/var/run/docker.sock:/var/run/docker.sock" "docker.io/pixelfederation/docker-client:$DOCKER_VERSION" info
+docker run --rm -ti -v "/var/run/docker.sock:/var/run/docker.sock" "docker.io/openswoolebundle/docker-client:$DOCKER_VERSION" info
 ```
 
-docker push docker.io/pixelfederation/docker-client
+docker push docker.io/openswoolebundle/docker-client
 
 ## GitLab Examples
 
@@ -33,7 +33,7 @@ docker push docker.io/pixelfederation/docker-client
 ```yaml
 build-docker-image:
   stage: build
-  image: docker.io/pixelfederation/docker-client:latest
+  image: docker.io/openswoolebundle/docker-client:latest
   variables:
     DOCKER_TLS_CERTDIR: /certs
     DOCKER_BUILDX_CONTEXT_CREATE: "1"
@@ -56,7 +56,7 @@ build-docker-image:
 ```yaml
 build-docker-image:
   stage: build
-  image: docker.io/pixelfederation/docker-client:latest
+  image: docker.io/openswoolebundle/docker-client:latest
   variables:
     DOCKER_TLS_CERTDIR: /certs
     AWS_ACCOUNT_ID: xxxxx
@@ -77,7 +77,7 @@ build-docker-image:
 ```yaml
 build-docker-image:
   stage: build
-  image: docker.io/pixelfederation/docker-client:latest
+  image: docker.io/openswoolebundle/docker-client:latest
   variables:
     DOCKER_TLS_CERTDIR: /certs
   services:
